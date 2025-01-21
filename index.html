@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genially Password Fetcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #output {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            background: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Genially Password Fetcher</h1>
+    <p>Enter the Genially API ID to fetch passwords:</p>
+    <input type="text" id="apiIdInput" placeholder="Enter API ID here">
+    <button onclick="fetchPasswords()">Fetch Passwords</button>
+    <div id="output"></div>
+
+    <script>
+        async function fetchPasswords() {
+            const apiId = document.getElementById('apiIdInput').value.trim();
+            if (!apiId) {
+                alert('Please enter a valid API ID.');
+                return;
+            }
+
+            const apiUrl = `https://view.genially.com/api/view/${apiId}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                        'Cookie': 'OptanonAlertBoxClosed=2024-06-02T16:12:03.620Z; _uetvid=d9bc203020fa11efbd824729151dbf8a; _ga=GA1.2.624198534.1717344724; _ga_N030GC3Z12=GS1.1.1717460991.5.0.1717460991.0.0.0; _sp_id.273c=b92fd4e9-548e-4836-a2e9-d57d9970d314.1724019228.1.1724019228..01f38943-05e2-4559-a399-5ae0e1bceb49..cc386549-a930-4469-afd2-22ff59c41047.1724019227839.1; OptanonConsent=isGpcEnabled=0&datestamp=Mon+Jan+20+2025+19%3A41%3A16+GMT-0500+(Eastern+Standard+Time)&version=202410.1.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=5b7286e0-06a0-46df-ad9c-19b742d78da2&interactionCount=1&isAnonUser=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A1%2CC0003%3A1%2CC0004%3A1&intType=1&geolocation=CA%3BON&AwaitingReconsent=false'
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Extract all "Password" fields
+                const passwords = [...JSON.stringify(data).matchAll(/"Password":"(.*?)"/g)].map(match => match[1]);
+
+                const outputDiv = document.getElementById('output');
+                if (passwords.length > 0) {
+                    outputDiv.textContent = `Passwords found:\n${passwords.join('\n')}`;
+                } else {
+                    outputDiv.textContent = 'No passwords found in the API response.';
+                }
+            } catch (error) {
+                const outputDiv = document.getElementById('output');
+                outputDiv.textContent = `Error fetching passwords: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
