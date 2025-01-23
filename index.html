@@ -66,7 +66,7 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    throw new Error(`No! You inputted the wrong API number. Please check your API ID.`);
                 }
 
                 const data = await response.json();
