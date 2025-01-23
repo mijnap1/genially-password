@@ -71,7 +71,6 @@
 
                 const data = await response.json();
 
-                // Extract all "Password" fields
                 const passwords = [...JSON.stringify(data).matchAll(/"Password":"(.*?)"/g)].map(match => match[1]);
 
                 const outputDiv = document.getElementById('output');
