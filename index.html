@@ -115,7 +115,6 @@
 
     .dropdown a ion-icon {
       font-size: 18px;
-      font-weight: bold;
     }
 
     .dropdown a:hover {
@@ -210,7 +209,6 @@
       position: relative;
       transition: transform 0.25s ease, box-shadow 0.3s ease;
       user-select: none;
-      z-index: 1;
     }
 
     .tag:hover {
@@ -251,19 +249,16 @@
       align-items: center;
       justify-content: center;
       z-index: 9999;
-      flex-direction: column;
     }
 
-    .review-box {
-      background: transparent;
-      padding: 0;
-      border-radius: 0;
-      text-align: center;
+    .stars {
+      display: flex;
+      gap: 12px;
     }
 
     .stars ion-icon {
-      font-size: 34px;
-      color: #888;
+      font-size: 36px;
+      color: #aaa;
       cursor: pointer;
       transition: transform 0.3s ease, color 0.3s ease;
     }
@@ -280,7 +275,7 @@
       letter-spacing: 2px;
       text-transform: uppercase;
       opacity: 0;
-      animation: fadeInText 1.4s ease forwards;
+      animation: fadeInText 1.2s ease forwards;
       margin-top: 20px;
     }
 
@@ -325,7 +320,7 @@
   </div>
 
   <div class="review-overlay" id="reviewOverlay">
-    <div class="review-box">
+    <div>
       <div class="stars" id="starContainer">
         <ion-icon name="star-outline" data-value="1"></ion-icon>
         <ion-icon name="star-outline" data-value="2"></ion-icon>
@@ -417,8 +412,8 @@
         thankYou.style.display = 'block';
         thankYou.style.opacity = 0;
         thankYou.style.animation = 'none';
-        void thankYou.offsetWidth; // reset animation
-        thankYou.style.animation = 'fadeInText 1.4s ease forwards';
+        void thankYou.offsetWidth;
+        thankYou.style.animation = 'fadeInText 1.2s ease forwards';
 
         setTimeout(() => {
           document.getElementById("reviewOverlay").style.display = 'none';
