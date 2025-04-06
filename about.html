@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 90%;
+      font-family: 'Poppins', sans-serif;
+      background: #f8f8f8;
+      color: #111;
+    }
+
+    .center-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      height: 100%;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    p {
+      max-width: 700px;
+      margin: 0 auto 30px auto;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    a.button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 26px;
+      border: 2px solid #888;
+      border-radius: 12px;
+      text-decoration: none;
+      color: #333;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    a.button:hover {
+      background: #ddd;
+    }
+
+    a.link {
+      color: #4c82f7;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a.link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="center-wrapper">
+    <h1>About</h1>
+    <p>
+      I originally built this site because two of my friends kept asking me for Genially passwords from our math class. Since I was too lazy to send them one by one every time, I decided to just create a quick tool that connects to the Genially API and grabs them automatically. I wanted it to look clean, feel smooth, and actually be helpful for students. Feel free to use it however you like, and if you’re curious about how it works behind the scenes, check out my
+      <a href="https://github.com/mijnap1/genially-password" class="link" target="_blank">GitHub</a> page.
+    </p>
+    <a class="button" href="index.html">Home</a>
+  </div>
+</body>
+</html>
