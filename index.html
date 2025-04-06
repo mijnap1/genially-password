@@ -5,7 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Genially Password Fetcher</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+  <script>
+    // Ensures icons don’t disappear
+    window.addEventListener("DOMContentLoaded", () => {
+      if (customElements.get('ion-icon')) return;
+      const checkIoniconsReady = setInterval(() => {
+        if (customElements.get('ion-icon')) {
+          clearInterval(checkIoniconsReady);
+          document.querySelectorAll('ion-icon').forEach(icon => {
+            const name = icon.getAttribute('name');
+            icon.setAttribute('name', name); // force re-render
+          });
+        }
+      }, 100);
+    });
+  </script>
   <style>
     :root {
       --bg: #0c0f13;
