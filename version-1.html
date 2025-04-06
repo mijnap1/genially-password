@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genially Exercise and Password Fetcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #output {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            background: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Genially Exercise and Password Fetcher</h1>
+    <p>Enter the Genially API ID to fetch exercises and passwords:</p>
+    <input type="text" id="apiIdInput" placeholder="Enter API ID here">
+    <button onclick="fetchData()">Fetch Data</button>
+    <div id="output"></div>
+
+    <script>
+        async function fetchData() {
+            const apiId = document.getElementById('apiIdInput').value.trim();
+            if (!apiId) {
+                alert('Please enter a valid API ID.');
+                return;
+            }
+
+            const apiUrl = `https://view.genially.com/api/view/${apiId}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const results = [];
+
+                // Extract TextMessage (exercises) and Password
+                const textMatches = JSON.stringify(data).match(/"TextMessage":"(.*?)"/g) || [];
+                const passwordMatches = JSON.stringify(data).match(/"Password":"(.*?)"/g) || [];
+
+                const length = Math.min(textMatches.length, passwordMatches.length);
+
+                for (let i = 0; i < length; i++) {
+                    const exerciseMatch = textMatches[i].match(/"TextMessage":"(.*?)"/);
+                    const passwordMatch = passwordMatches[i].match(/"Password":"(.*?)"/);
+
+                    const exercise = exerciseMatch ? exerciseMatch[1].replace(/<\/?[^>]+(>|$)/g, "") : "Unknown Exercise";
+                    const password = passwordMatch ? passwordMatch[1] : "Unknown Password";
+
+                    results.push({ exercise, password });
+                }
+
+                const outputDiv = document.getElementById('output');
+                if (results.length > 0) {
+                    outputDiv.textContent = results
+                        .map(result => `Exercise: ${result.exercise}, Password: '${result.password}'`)
+                        .join('\n');
+                } else {
+                    outputDiv.textContent = 'No exercises or passwords found in the API response.';
+                }
+            } catch (error) {
+                const outputDiv = document.getElementById('output');
+                outputDiv.textContent = `Error fetching data: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
