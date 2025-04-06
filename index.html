@@ -1,89 +1,433 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Genially Password Fetcher</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        #output {
-            margin-top: 20px;
-            white-space: pre-wrap;
-            background: #f5f5f5;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        input[type="text"] {
-            width: 300px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-right: 10px;
-        }
-        button {
-            padding: 8px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Genially Password Fetcher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  <style>
+    :root {
+      --bg: #0c0f13;
+      --card: #1a1e26;
+      --input: #232730;
+      --text: #f5f5f5;
+      --subtle: #999;
+      --accent: #4c82f7;
+      --output: #2a2f3a;
+      --copied-bg: #1b1d22;
+      --hover-bg: #3a3e47;
+    }
+
+    body.light {
+      --bg: #f6f8fa;
+      --card: #ffffff;
+      --input: #e9ebf0;
+      --text: #222;
+      --subtle: #666;
+      --accent: #4c82f7;
+      --output: #f0f0f0;
+      --copied-bg: #444;
+      --hover-bg: #d2d7e0;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .header {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .title {
+      flex-grow: 1;
+      text-align: center;
+      margin-top: -10px;
+    }
+
+    .title h1 {
+      font-size: 40px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .title span {
+      font-size: 16px;
+      color: var(--subtle);
+    }
+
+    .header button {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 24px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .header button:hover {
+      transform: scale(1.2) rotate(10deg);
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      display: none;
+      flex-direction: column;
+      z-index: 10;
+      min-width: 160px;
+    }
+
+    .dropdown a {
+      color: var(--text);
+      text-decoration: none;
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .dropdown a ion-icon {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .dropdown a:hover {
+      background: var(--hover-bg);
+    }
+
+    .container {
+      background: var(--card);
+      padding: 48px 36px;
+      border-radius: 18px;
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+      width: 95%;
+      max-width: 580px;
+      text-align: center;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    p {
+      font-size: 15px;
+      color: var(--subtle);
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background-color: var(--input);
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 22px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    input[type="text"]:focus {
+      box-shadow: 0 0 0 2px rgba(76,130,247,0.3);
+    }
+
+    input[type="text"]::placeholder {
+      color: #777;
+    }
+
+    button.fetch-btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button.fetch-btn:hover {
+      background: #3a6be0;
+      transform: scale(1.02);
+    }
+
+    #output {
+      margin-top: 30px;
+      background: var(--output);
+      padding: 24px;
+      border-radius: 12px;
+      font-size: 15px;
+      border-left: 4px solid var(--accent);
+      display: none;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .password-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      background-color: var(--input);
+      color: var(--text);
+      padding: 10px 18px;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.25s ease, box-shadow 0.3s ease;
+      user-select: none;
+      z-index: 1;
+    }
+
+    .tag:hover {
+      background-color: var(--hover-bg);
+      transform: scale(1.06);
+      box-shadow: 0 0 12px rgba(76,130,247,0.3);
+    }
+
+    .copied-msg {
+      position: absolute;
+      top: -26px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--copied-bg);
+      color: #fff;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 999;
+    }
+
+    .tag.copied .copied-msg {
+      opacity: 1;
+    }
+
+    .review-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      flex-direction: column;
+    }
+
+    .review-box {
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      text-align: center;
+    }
+
+    .stars ion-icon {
+      font-size: 34px;
+      color: #888;
+      cursor: pointer;
+      transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .stars ion-icon.hovered {
+      color: gold;
+      transform: scale(1.15);
+    }
+
+    .thank-you {
+      font-size: 28px;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeInText 1.4s ease forwards;
+      margin-top: 20px;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInText {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-    <h1>Genially Password Fetcher (Made by a lazy LFT guy)</h1>
+
+  <div class="header">
+    <button onclick="toggleTheme()">
+      <ion-icon name="moon" id="themeIcon"></ion-icon>
+    </button>
+    <div class="title">
+      <h1>Genially Password Fetcher</h1>
+      <span>v1.1</span>
+    </div>
+    <button onclick="toggleDropdown()">
+      <ion-icon name="ellipsis-vertical"></ion-icon>
+    </button>
+    <div class="dropdown" id="dropdownMenu">
+      <a href="about.html"><ion-icon name="information-circle-outline"></ion-icon> About</a>
+      <a href="#" onclick="openReview()"><ion-icon name="star-outline"></ion-icon> Review</a>
+      <a href="feedback.html"><ion-icon name="chatbox-ellipses-outline"></ion-icon> Feedback</a>
+    </div>
+  </div>
+
+  <div class="container">
     <p>Enter the Genially API ID to fetch passwords:</p>
-    <input type="text" id="apiIdInput" placeholder="Enter API ID here">
-    <button onclick="fetchPasswords()">Fetch Passwords</button>
+    <input type="text" id="apiIdInput" placeholder="e.g. 67d9ea17b6bd6a97c2383c04">
+    <button class="fetch-btn" onclick="fetchPasswords()">Fetch Passwords</button>
     <div id="output"></div>
+  </div>
 
-    <script>
-        async function fetchPasswords() {
-            const apiId = document.getElementById('apiIdInput').value.trim();
-            if (!apiId) {
-                alert('Please enter a valid API ID.');
-                return;
-            }
+  <div class="review-overlay" id="reviewOverlay">
+    <div class="review-box">
+      <div class="stars" id="starContainer">
+        <ion-icon name="star-outline" data-value="1"></ion-icon>
+        <ion-icon name="star-outline" data-value="2"></ion-icon>
+        <ion-icon name="star-outline" data-value="3"></ion-icon>
+        <ion-icon name="star-outline" data-value="4"></ion-icon>
+        <ion-icon name="star-outline" data-value="5"></ion-icon>
+      </div>
+      <div class="thank-you" id="thankYouMessage" style="display: none;">THANK YOU!</div>
+    </div>
+  </div>
 
-            const apiUrl = `https://view.genially.com/api/view/${apiId}`;
+  <script>
+    document.getElementById('apiIdInput').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') fetchPasswords();
+    });
 
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json, text/plain, */*',
-                        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-                        'Cookie': 'OptanonAlertBoxClosed=2024-06-02T16:12:03.620Z; _uetvid=d9bc203020fa11efbd824729151dbf8a; _ga=GA1.2.624198534.1717344724; _ga_N030GC3Z12=GS1.1.1717460991.5.0.1717460991.0.0.0; _sp_id.273c=b92fd4e9-548e-4836-a2e9-d57d9970d314.1724019228.1.1724019228..01f38943-05e2-4559-a399-5ae0e1bceb49..cc386549-a930-4469-afd2-22ff59c41047.1724019227839.1; OptanonConsent=isGpcEnabled=0&datestamp=Mon+Jan+20+2025+19%3A41%3A16+GMT-0500+(Eastern+Standard+Time)&version=202410.1.0&browserGpcFlag=0&isIABGlobal=false&hosts=&consentId=5b7286e0-06a0-46df-ad9c-19b742d78da2&interactionCount=1&isAnonUser=1&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A1%2CC0003%3A1%2CC0004%3A1&intType=1&geolocation=CA%3BON&AwaitingReconsent=false'
-                    },
-                });
+    function toggleTheme() {
+      const body = document.body;
+      const icon = document.getElementById("themeIcon");
+      body.classList.toggle('light');
+      icon.setAttribute('name', body.classList.contains('light') ? 'sunny' : 'moon');
+      icon.style.transform = 'rotate(360deg) scale(1.3)';
+      setTimeout(() => icon.style.transform = '', 300);
+    }
 
-                if (!response.ok) {
-                    throw new Error(`No! You inputted the wrong API number. Please check your API ID.`);
-                }
+    function toggleDropdown() {
+      const menu = document.getElementById("dropdownMenu");
+      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    }
 
-                const data = await response.json();
+    async function fetchPasswords() {
+      const apiId = document.getElementById('apiIdInput').value.trim();
+      const outputDiv = document.getElementById('output');
+      outputDiv.style.display = 'none';
+      outputDiv.innerHTML = '';
 
-                const passwords = [...JSON.stringify(data).matchAll(/"Password":"(.*?)"/g)].map(match => match[1]);
+      if (!apiId) {
+        alert('Please enter a valid API ID.');
+        return;
+      }
 
-                const outputDiv = document.getElementById('output');
-                if (passwords.length > 0) {
-                    outputDiv.textContent = `Passwords found:\n${passwords.join('\n')}`;
-                } else {
-                    outputDiv.textContent = 'No passwords found in the API response.';
-                }
-            } catch (error) {
-                const outputDiv = document.getElementById('output');
-                outputDiv.textContent = `Error! ${error.message}`;
-            }
+      const apiUrl = `https://view.genially.com/api/view/${apiId}`;
+      try {
+        const response = await fetch(apiUrl, { headers: { 'Accept': 'application/json' } });
+        if (!response.ok) throw new Error('Invalid API ID.');
+        const data = await response.json();
+        const passwords = [...JSON.stringify(data).matchAll(/"Password":"(.*?)"/g)].map(m => m[1]);
+
+        if (passwords.length > 0) {
+          const gridHTML = passwords.map(pw => `
+            <span class="tag" onclick="copyToClipboard(this)">
+              ${pw}
+              <span class="copied-msg">Copied!</span>
+            </span>`).join('');
+          outputDiv.innerHTML = `<div class="password-grid">${gridHTML}</div>`;
+        } else {
+          outputDiv.textContent = 'No passwords found.';
         }
-    </script>
+      } catch (error) {
+        outputDiv.textContent = `❌ Error: ${error.message}`;
+      }
+
+      outputDiv.style.display = 'block';
+    }
+
+    function copyToClipboard(el) {
+      const text = el.innerText.replace("Copied!", "").trim();
+      navigator.clipboard.writeText(text).then(() => {
+        el.classList.add("copied");
+        setTimeout(() => el.classList.remove("copied"), 1000);
+      });
+    }
+
+    function openReview() {
+      document.getElementById("reviewOverlay").style.display = "flex";
+    }
+
+    const stars = document.querySelectorAll('#starContainer ion-icon');
+    stars.forEach(star => {
+      star.addEventListener('mouseover', () => {
+        const val = star.getAttribute('data-value');
+        stars.forEach(s => {
+          s.classList.toggle('hovered', s.getAttribute('data-value') <= val);
+        });
+      });
+      star.addEventListener('click', () => {
+        document.getElementById("starContainer").style.display = 'none';
+        const thankYou = document.getElementById("thankYouMessage");
+        thankYou.style.display = 'block';
+        thankYou.style.opacity = 0;
+        thankYou.style.animation = 'none';
+        void thankYou.offsetWidth; // reset animation
+        thankYou.style.animation = 'fadeInText 1.4s ease forwards';
+
+        setTimeout(() => {
+          document.getElementById("reviewOverlay").style.display = 'none';
+          thankYou.style.display = 'none';
+          document.getElementById("starContainer").style.display = 'flex';
+        }, 2500);
+      });
+    });
+  </script>
 </body>
 </html>
