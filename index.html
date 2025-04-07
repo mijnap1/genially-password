@@ -306,6 +306,25 @@
       0% { opacity: 0; transform: translateY(10px); }
       100% { opacity: 1; transform: translateY(0); }
     }
+
+    .loading {
+  font-size: 16px;
+  color: var(--subtle);
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+code {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-family: monospace;
+  font-size: 14px;
+}
   </style>
 </head>
 <body>
@@ -316,7 +335,7 @@
     </button>
     <div class="title">
       <h1>Genially Password Fetcher</h1>
-      <span>v1.1</span>
+      <span>v1.2</span>
     </div>
     <button onclick="toggleDropdown()">
       <ion-icon name="ellipsis-vertical"></ion-icon>
@@ -368,47 +387,62 @@
     }
 
     async function fetchPasswords() {
-      const apiId = document.getElementById('apiIdInput').value.trim();
-      const outputDiv = document.getElementById('output');
+    const apiId = document.getElementById('apiIdInput').value.trim();
+    const outputDiv = document.getElementById('output');
+    outputDiv.style.display = 'none';
+    outputDiv.innerHTML = '<div class="loading">Fetching passwords...</div>';
+    outputDiv.style.display = 'block';
+
+    if (!apiId) {
+      alert('Please enter a valid API ID.');
       outputDiv.style.display = 'none';
-      outputDiv.innerHTML = '';
+      return;
+    }
 
-      if (!apiId) {
-        alert('Please enter a valid API ID.');
-        return;
-      }
+    // ⏳ Simulate a delay between 1 and 3 seconds
+    const delay = Math.floor(Math.random() * 2000) + 1000;
+    await new Promise(resolve => setTimeout(resolve, delay));
 
-      const apiUrl = `https://view.genially.com/api/view/${apiId}`;
-      try {
-        const response = await fetch(apiUrl, { headers: { 'Accept': 'application/json' } });
-        if (!response.ok) throw new Error('Invalid API ID.');
-        const data = await response.json();
-        const passwords = [...JSON.stringify(data).matchAll(/"Password":"(.*?)"/g)].map(m => m[1]);
+    const apiUrl = `https://view.genially.com/api/view/${apiId}`;
+    try {
+      const response = await fetch(apiUrl, { headers: { 'Accept': 'application/json' } });
+      if (!response.ok) throw new Error('Invalid API ID.');
+      const data = await response.json();
+      const raw = JSON.stringify(data);
 
-        if (passwords.length > 0) {
-          const gridHTML = passwords.map(pw => `
-            <span class="tag" onclick="copyToClipboard(this)">
-              ${pw}
+      const passwords = [...raw.matchAll(/"Password":"(.*?)"/g)].map(m => m[1]);
+      const exercises = [...raw.matchAll(/(Exercice|Activité)\s+\d+\s+p\.\d+/gi)].map(m => m[0]);
+
+      if (passwords.length > 0) {
+        let displayHTML = '';
+        for (let i = 0; i < passwords.length; i++) {
+          const label = exercises[i] || `Item ${i + 1}`;
+          const password = passwords[i];
+          displayHTML += `
+            <div class="tag" onclick="copyToClipboard(this.querySelector('.pw'))">
+              <strong>${label}</strong><br>
+              🔒 Password: <code class="pw">${password}</code>
               <span class="copied-msg">Copied!</span>
-            </span>`).join('');
-          outputDiv.innerHTML = `<div class="password-grid">${gridHTML}</div>`;
-        } else {
-          outputDiv.textContent = 'No passwords found.';
+            </div>
+          `;
         }
-      } catch (error) {
-        outputDiv.textContent = `❌ Error: ${error.message}`;
+        outputDiv.innerHTML = `<div class="password-grid">${displayHTML}</div>`;
+      } else {
+        outputDiv.textContent = 'No passwords found.';
       }
-
-      outputDiv.style.display = 'block';
+    } catch (error) {
+      outputDiv.innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
     }
+  }
 
-    function copyToClipboard(el) {
-      const text = el.innerText.replace("Copied!", "").trim();
-      navigator.clipboard.writeText(text).then(() => {
-        el.classList.add("copied");
-        setTimeout(() => el.classList.remove("copied"), 1000);
-      });
-    }
+  function copyToClipboard(el) {
+    const text = el.textContent.trim();
+    navigator.clipboard.writeText(text).then(() => {
+      const parent = el.closest('.tag');
+      parent.classList.add("copied");
+      setTimeout(() => parent.classList.remove("copied"), 1000);
+    });
+  }
 
     function openReview() {
       document.getElementById("reviewOverlay").style.display = "flex";
@@ -461,3 +495,4 @@
   </style>
 </body>
 </html>
+
