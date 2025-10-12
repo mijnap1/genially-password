@@ -1,170 +1,499 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>We’ll be right back — status</title>
-  <meta name="description" content="A clean, calm blue‑and‑white waiting page with subtle motion and excellent performance/accessibility." />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Genially Password Fetcher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+  <script>
+    // Ensures icons don’t disappear
+    window.addEventListener("DOMContentLoaded", () => {
+      if (customElements.get('ion-icon')) return;
+      const checkIoniconsReady = setInterval(() => {
+        if (customElements.get('ion-icon')) {
+          clearInterval(checkIoniconsReady);
+          document.querySelectorAll('ion-icon').forEach(icon => {
+            const name = icon.getAttribute('name');
+            icon.setAttribute('name', name); // force re-render
+          });
+        }
+      }, 100);
+    });
+  </script>
   <style>
-    :root{
-      /* Palette — blue & white */
-      --bg-0: #ffffff;
-      --bg-1: #f7fbff; /* paper white w/ blue tint */
-      --bg-2: #eef6ff; /* very light blue */
-      --ink: #0b1f44;  /* deep navy for text */
-      --muted: #557199; /* muted blue */
-      --accent: #1e7cf2; /* primary blue */
-      --line: #d8e7ff;   /* soft divider */
-
-      /* Background blob positions (animated) */
-      --b1x: 22%; --b1y: 28%;
-      --b2x: 78%; --b2y: 72%;
-
-      /* Card sizing */
-      --card-pad: clamp(22px, 5vw, 42px);
-      --radius: 24px;
+    :root {
+      --bg: #0c0f13;
+      --card: #1a1e26;
+      --input: #232730;
+      --text: #f5f5f5;
+      --subtle: #999;
+      --accent: #4c82f7;
+      --output: #2a2f3a;
+      --copied-bg: #1b1d22;
+      --hover-bg: #3a3e47;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-
-    body{
-      margin:0;
-      color:var(--ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background:
-        radial-gradient(64vmax 64vmax at var(--b1x) var(--b1y), rgba(30,124,242,.10), rgba(30,124,242,0) 60%),
-        radial-gradient(72vmax 72vmax at var(--b2x) var(--b2y), rgba(14,62,155,.10), rgba(14,62,155,0) 65%),
-        linear-gradient(180deg, var(--bg-1), var(--bg-2));
-      background-attachment: fixed, fixed, fixed;
-      display:grid; place-items:center;
-      overflow:hidden;
+    body.light {
+      --bg: #f6f8fa;
+      --card: #ffffff;
+      --input: #e9ebf0;
+      --text: #222;
+      --subtle: #666;
+      --accent: #4c82f7;
+      --output: #f0f0f0;
+      --copied-bg: #444;
+      --hover-bg: #d2d7e0;
     }
 
-    /* Gentle animated drift of the background blobs */
-    @keyframes drift {
-      0%{ --b1x:22%; --b1y:28%; --b2x:78%; --b2y:72%; }
-      50%{ --b1x:30%; --b1y:24%; --b2x:70%; --b2y:76%; }
-      100%{ --b1x:22%; --b1y:28%; --b2x:78%; --b2y:72%; }
-    }
-    body{ animation: drift 26s ease-in-out infinite; }
+    * { box-sizing: border-box; }
 
-    /* Subtle paper grain for depth (no images) */
-    body::before{
-      content:""; position:fixed; inset:0; pointer-events:none;
-      background: repeating-linear-gradient(90deg, rgba(0,0,0,.015) 0 1px, rgba(255,255,255,.015) 1px 2px);
-      mix-blend-mode: soft-light; opacity:.25;
-    }
-
-    /* Center card */
-    .card{
-      position:relative;
-      width:min(720px, 92vw);
-      padding:var(--card-pad);
-      border-radius:var(--radius);
-      background:rgba(255,255,255,.7);
-      border:1px solid var(--line);
-      -webkit-backdrop-filter: blur(10px);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 20px 60px rgba(30,60,120,.12), 0 8px 20px rgba(30,60,120,.08);
-      text-align:center;
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      min-height: 100vh;
     }
 
-    /* Halo behind the card */
-    .card::before{
-      content:""; position:absolute; inset:-80px; z-index:-1;
-      background:
-        conic-gradient(from 0deg, transparent 0 50%, rgba(30,124,242,.16) 60% 60%, transparent 70% 100%);
-      filter: blur(48px);
-      -webkit-mask: radial-gradient(closest-side circle, rgba(0,0,0,.9), transparent 70%);
-              mask: radial-gradient(closest-side circle, rgba(0,0,0,.9), transparent 70%);
-      animation: spin 30s linear infinite;
+    .header {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      position: relative;
     }
-    @keyframes spin{ to{ transform: rotate(1turn); } }
 
-    .badge{
-      display:inline-flex; gap:.6ch; align-items:center; user-select:none;
-      padding:8px 12px; border-radius:999px;
-      background: linear-gradient(180deg, #fff, #f5f9ff);
-      border:1px solid var(--line);
-      color:var(--muted); font-size:12px; letter-spacing:.06em; text-transform:uppercase;
-      margin-bottom:14px;
+    .title {
+      flex-grow: 1;
+      text-align: center;
+      margin-top: -10px;
     }
-    .dot{ width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 0 rgba(30,124,242,.45); animation:pulse 2s ease-out infinite; }
-    @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(30,124,242,.45)} 70%{box-shadow:0 0 0 10px rgba(30,124,242,0)} 100%{box-shadow:0 0 0 0 rgba(30,124,242,0)} }
 
-    h1{ margin:0 0 10px; font-size:clamp(28px, 6.2vw, 56px); line-height:1.04; letter-spacing:-.02em; }
-    .subtitle{ margin:0; color:var(--muted); font-size:clamp(14px, 2.6vw, 18px); }
-
-    /* Progress bar */
-    .progress{ position:relative; height:8px; width:min(520px, 80vw); margin:26px auto 0; border-radius:999px; background: #e9f2ff; border:1px solid var(--line); overflow:hidden; }
-    .progress::before{
-      content:""; position:absolute; inset:0; width:40%;
-      background: linear-gradient(90deg, rgba(30,124,242,.12), rgba(30,124,242,.35), rgba(30,124,242,.12));
-      border-radius:inherit; filter: saturate(120%);
-      animation: load 2.4s ease-in-out infinite;
+    .title h1 {
+      font-size: 40px;
+      font-weight: 700;
+      margin: 0;
     }
-    @keyframes load{ 0%{ transform:translateX(-60%)} 100%{ transform:translateX(260%)} }
 
-    .links{ margin-top:18px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
-    .btn{
-      appearance:none; border:none; cursor:pointer; user-select:none;
-      padding:10px 14px; border-radius:12px; font-size:14px; font-weight:600;
-      background:#fff; color:var(--ink); border:1px solid var(--line);
-      transition: transform .15s ease, box-shadow .2s ease;
+    .title span {
+      font-size: 16px;
+      color: var(--subtle);
     }
-    .btn.primary{ background:linear-gradient(180deg, #1976f3, #1067e6); color:#fff; border-color:#1467e6; }
-    .btn:hover{ transform: translateY(-1px); box-shadow:0 8px 20px rgba(30,60,120,.14) }
-    .btn:active{ transform:none }
 
-    .hint{ margin-top:14px; font-size:12px; color:#6983a7 }
-
-    /* Footer help */
-    .help{ position:fixed; right:14px; bottom:12px; font-size:11px; color:#58729b; background:#fff; border:1px solid var(--line); border-radius:999px; padding:8px 10px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-
-    @media (prefers-reduced-motion: reduce){
-      body{ animation:none }
-      .card::before{ animation:none }
-      .progress::before{ animation:none; width:0 }
-      .dot{ animation:none }
+    .header button {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 24px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      margin-top: 10px;
     }
+
+    .header button:hover {
+      transform: scale(1.2) rotate(10deg);
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      display: none;
+      flex-direction: column;
+      z-index: 10;
+      min-width: 160px;
+    }
+
+    .dropdown a {
+      color: var(--text);
+      text-decoration: none;
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .dropdown a ion-icon {
+      font-size: 18px;
+    }
+
+    .dropdown a:hover {
+      background: var(--hover-bg);
+    }
+
+    .container {
+      background: var(--card);
+      padding: 48px 36px;
+      border-radius: 18px;
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+      width: 95%;
+      max-width: 580px;
+      text-align: center;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    p {
+      font-size: 15px;
+      color: var(--subtle);
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      background-color: var(--input);
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 22px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    input[type="text"]:focus {
+      box-shadow: 0 0 0 2px rgba(76,130,247,0.3);
+    }
+
+    input[type="text"]::placeholder {
+      color: #777;
+    }
+
+    button.fetch-btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button.fetch-btn:hover {
+      background: #3a6be0;
+      transform: scale(1.02);
+    }
+
+    #output {
+      margin-top: 30px;
+      background: var(--output);
+      padding: 24px;
+      border-radius: 12px;
+      font-size: 15px;
+      border-left: 4px solid var(--accent);
+      display: none;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .password-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      background-color: var(--input);
+      color: var(--text);
+      padding: 10px 18px;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.25s ease, box-shadow 0.3s ease;
+      user-select: none;
+    }
+
+    .tag:hover {
+      background-color: var(--hover-bg);
+      transform: scale(1.06);
+      box-shadow: 0 0 12px rgba(76,130,247,0.3);
+    }
+
+    .copied-msg {
+      position: absolute;
+      top: -26px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--copied-bg);
+      color: #fff;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 999;
+    }
+
+    .tag.copied .copied-msg {
+      opacity: 1;
+    }
+
+    .review-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .stars {
+      display: flex;
+      gap: 12px;
+    }
+
+    .stars ion-icon {
+      font-size: 36px;
+      color: #aaa;
+      cursor: pointer;
+      transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .stars ion-icon.hovered {
+      color: gold;
+      transform: scale(1.15);
+    }
+
+    .thank-you {
+      font-size: 28px;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeInText 1.2s ease forwards;
+      margin-top: 20px;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInText {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .loading {
+  font-size: 16px;
+  color: var(--subtle);
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+code {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-family: monospace;
+  font-size: 14px;
+}
   </style>
 </head>
 <body>
-  <main class="card" role="main" aria-labelledby="title">
-    <div class="badge" aria-live="polite"><span class="dot" aria-hidden="true"></span> <span id="status">Status • Temporarily offline</span></div>
-    <h1 id="title">We’ll be right back</h1>
-    <p class="subtitle">We’re polishing a few things behind the scenes. Thanks for your patience.</p>
-    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Loading"></div>
 
-    <div class="links" aria-label="Helpful actions">
-      <button class="btn primary" id="retry">Retry now</button>
-      <a class="btn" href="mailto:hello@example.com?subject=Site%20status" id="contact">Contact support</a>
+  <div class="header">
+    <button onclick="toggleTheme()">
+      <ion-icon name="moon" id="themeIcon"></ion-icon>
+    </button>
+    <div class="title">
+      <h1>Genially Password Fetcher</h1>
+      <span>v1.2</span>
     </div>
+    <button onclick="toggleDropdown()">
+      <ion-icon name="ellipsis-vertical"></ion-icon>
+    </button>
+    <div class="dropdown" id="dropdownMenu">
+      <a href="about.html"><ion-icon name="information-circle-outline"></ion-icon> About</a>
+      <a href="#" onclick="openReview()"><ion-icon name="star-outline"></ion-icon> Review</a>
+      <a href="feedback.html"><ion-icon name="chatbox-ellipses-outline"></ion-icon> Feedback</a>
+    </div>
+  </div>
 
-    <p class="hint" id="timestamp" aria-live="polite"></p>
-  </main>
+  <div class="container">
+    <p>Enter the Genially API ID to fetch passwords:</p>
+    <input type="text" id="apiIdInput" placeholder="e.g. 67d9ea17b6bd6a97c2383c04">
+    <button class="fetch-btn" onclick="fetchPasswords()">Fetch Passwords</button>
+    <div id="output"></div>
+  </div>
 
-  <div class="help" aria-hidden="true">Clean blue theme · Accessible · Lightweight</div>
+  <div class="review-overlay" id="reviewOverlay">
+    <div>
+      <div class="stars" id="starContainer">
+        <ion-icon name="star-outline" data-value="1"></ion-icon>
+        <ion-icon name="star-outline" data-value="2"></ion-icon>
+        <ion-icon name="star-outline" data-value="3"></ion-icon>
+        <ion-icon name="star-outline" data-value="4"></ion-icon>
+        <ion-icon name="star-outline" data-value="5"></ion-icon>
+      </div>
+      <div class="thank-you" id="thankYouMessage" style="display: none;">THANK YOU!</div>
+    </div>
+  </div>
 
   <script>
-    // Minimal JS: update timestamp and handle retry
-    const ts = new Date();
-    const fmt = new Intl.DateTimeFormat(undefined,{ dateStyle:'medium', timeStyle:'short' });
-    document.getElementById('timestamp').textContent = `Last checked ${fmt.format(ts)}`;
-
-    document.getElementById('retry').addEventListener('click', () => {
-      // Small affordance before reload
-      const btn = document.getElementById('retry');
-      btn.disabled = true; btn.textContent = 'Checking…';
-      setTimeout(() => location.reload(), 450);
+    document.getElementById('apiIdInput').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') fetchPasswords();
     });
 
-    // Optional: in case you want to toggle an online state dynamically later
-    // Example API hook point:
-    // fetch('/health').then(r => r.ok ? online() : offline()).catch(offline)
-    function online(){ document.getElementById('status').textContent = 'Status • Online'; }
-    function offline(){ document.getElementById('status').textContent = 'Status • Temporarily offline'; }
+    function toggleTheme() {
+      const body = document.body;
+      const icon = document.getElementById("themeIcon");
+      body.classList.toggle('light');
+      icon.setAttribute('name', body.classList.contains('light') ? 'sunny' : 'moon');
+      icon.style.transform = 'rotate(360deg) scale(1.3)';
+      setTimeout(() => icon.style.transform = '', 300);
+    }
+
+    function toggleDropdown() {
+      const menu = document.getElementById("dropdownMenu");
+      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    }
+
+    async function fetchPasswords() {
+    const apiId = document.getElementById('apiIdInput').value.trim();
+    const outputDiv = document.getElementById('output');
+    outputDiv.style.display = 'none';
+    outputDiv.innerHTML = '<div class="loading">Fetching passwords...</div>';
+    outputDiv.style.display = 'block';
+
+    if (!apiId) {
+      alert('Please enter a valid API ID.');
+      outputDiv.style.display = 'none';
+      return;
+    }
+
+    // ⏳ Simulate a delay between 1 and 3 seconds
+    const delay = Math.floor(Math.random() * 2000) + 1000;
+    await new Promise(resolve => setTimeout(resolve, delay));
+
+    const apiUrl = `https://view.genially.com/api/view/${apiId}`;
+    try {
+      const response = await fetch(apiUrl, { headers: { 'Accept': 'application/json' } });
+      if (!response.ok) throw new Error('Invalid API ID.');
+      const data = await response.json();
+      const raw = JSON.stringify(data);
+
+      const passwords = [...raw.matchAll(/"Password":"(.*?)"/g)].map(m => m[1]);
+      const exercises = [...raw.matchAll(/(Exercice|Activité)\s+\d+\s+p\.\d+/gi)].map(m => m[0]);
+
+      if (passwords.length > 0) {
+        let displayHTML = '';
+        for (let i = 0; i < passwords.length; i++) {
+          const label = exercises[i] || `Item ${i + 1}`;
+          const password = passwords[i];
+          displayHTML += `
+            <div class="tag" onclick="copyToClipboard(this.querySelector('.pw'))">
+              <strong>${label}</strong><br>
+              🔒 Password: <code class="pw">${password}</code>
+              <span class="copied-msg">Copied!</span>
+            </div>
+          `;
+        }
+        outputDiv.innerHTML = `<div class="password-grid">${displayHTML}</div>`;
+      } else {
+        outputDiv.textContent = 'No passwords found.';
+      }
+    } catch (error) {
+      outputDiv.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+    }
+  }
+
+  function copyToClipboard(el) {
+    const text = el.textContent.trim();
+    navigator.clipboard.writeText(text).then(() => {
+      const parent = el.closest('.tag');
+      parent.classList.add("copied");
+      setTimeout(() => parent.classList.remove("copied"), 1000);
+    });
+  }
+
+    function openReview() {
+      document.getElementById("reviewOverlay").style.display = "flex";
+    }
+
+    const stars = document.querySelectorAll('#starContainer ion-icon');
+    stars.forEach(star => {
+      star.addEventListener('mouseover', () => {
+        const val = star.getAttribute('data-value');
+        stars.forEach(s => {
+          s.classList.toggle('hovered', s.getAttribute('data-value') <= val);
+        });
+      });
+      star.addEventListener('click', () => {
+        document.getElementById("starContainer").style.display = 'none';
+        const thankYou = document.getElementById("thankYouMessage");
+        thankYou.style.display = 'block';
+        thankYou.style.opacity = 0;
+        thankYou.style.animation = 'none';
+        void thankYou.offsetWidth;
+        thankYou.style.animation = 'fadeInText 1.2s ease forwards';
+
+        setTimeout(() => {
+          document.getElementById("reviewOverlay").style.display = 'none';
+          thankYou.style.display = 'none';
+          document.getElementById("starContainer").style.display = 'flex';
+        }, 2500);
+      });
+    });
   </script>
+  <footer style="margin-top: 50px; text-align: center; font-size: 13px; color: var(--subtle); padding-bottom: 30px;">
+    © 2025 The Lazy LFT Student ·
+    <a href="version-1.html" target="_blank" class="footer-link">
+      Previous Version
+    </a>
+  </footer>
+
+  <style>
+    .footer-link {
+      color: var(--accent);
+      text-decoration: none;
+      position: relative;
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+
+    .footer-link:hover {
+      color: #3a6be0;
+      transform: translateY(-2px);
+    }
+  </style>
 </body>
 </html>
+
+
