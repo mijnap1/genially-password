@@ -413,36 +413,38 @@ code {
       menu.style.display = menu.style.display === "flex" ? "none" : "flex";
     }
 
-    function extractExercisePasswordPairs(raw) {
-      const exerciseRegex = /(Exercice|Activité)\s+\d+\s+p\.\d+/gi;
-      const passwordRegex = /"Password":"(.*?)"/g;
+    function cleanExerciseLabel(text) {
+      return text
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .replace(/p\.\s+/gi, 'p.')
+        .trim();
+    }
 
-      const exercises = [...raw.matchAll(exerciseRegex)].map(match => ({
-        label: match[0],
-        index: match.index ?? -1
+    function extractExercisePasswordPairs(data) {
+      const actions = data.interactivityActions || {};
+      const slideLabelMap = new Map();
+
+      for (const textItem of data.Texts || []) {
+        const message = textItem.TextMessage || '';
+        if (!/(Exercice|Activité)\s+\d+\s+p\.?\s*\d+/i.test(message)) continue;
+
+        const actionKey = textItem.interactivities?.click;
+        const action = actionKey ? actions[actionKey] : null;
+        const targetSlideId = action?.targetSlideId || action?.target?.slideId;
+        if (!targetSlideId) continue;
+
+        slideLabelMap.set(targetSlideId, cleanExerciseLabel(message));
+      }
+
+      const passwordSlides = (data.Slides || [])
+        .filter(slide => slide.Password)
+        .sort((a, b) => Number(a.Order || 0) - Number(b.Order || 0));
+
+      return passwordSlides.map((slide, i) => ({
+        label: slideLabelMap.get(slide.Id) || cleanExerciseLabel(slide.PasswordPageConfig?.title || '') || `Item ${i + 1}`,
+        password: slide.Password
       }));
-
-      const passwords = [...raw.matchAll(passwordRegex)].map(match => ({
-        value: match[1],
-        index: match.index ?? -1
-      }));
-
-      return passwords.map((password, i) => {
-        let matchedExercise = null;
-
-        for (const exercise of exercises) {
-          if (exercise.index <= password.index) {
-            matchedExercise = exercise;
-          } else {
-            break;
-          }
-        }
-
-        return {
-          label: matchedExercise?.label || `Item ${i + 1}`,
-          password: password.value
-        };
-      });
     }
 
     async function fetchPasswords() {
@@ -467,9 +469,7 @@ code {
       const response = await fetch(apiUrl, { headers: { 'Accept': 'application/json' } });
       if (!response.ok) throw new Error('Invalid API ID.');
       const data = await response.json();
-      const raw = JSON.stringify(data);
-
-      const entries = extractExercisePasswordPairs(raw);
+      const entries = extractExercisePasswordPairs(data);
 
       if (entries.length > 0) {
         let displayHTML = '';
