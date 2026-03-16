@@ -423,7 +423,7 @@ code {
 
     function extractExercisePasswordPairs(data) {
       const actions = data.interactivityActions || {};
-      const slideLabelMap = new Map();
+      const orderedExerciseLabels = [];
 
       for (const textItem of data.Texts || []) {
         const message = textItem.TextMessage || '';
@@ -434,7 +434,7 @@ code {
         const targetSlideId = action?.targetSlideId || action?.target?.slideId;
         if (!targetSlideId) continue;
 
-        slideLabelMap.set(targetSlideId, cleanExerciseLabel(message));
+        orderedExerciseLabels.push(cleanExerciseLabel(message));
       }
 
       const passwordSlides = (data.Slides || [])
@@ -442,7 +442,7 @@ code {
         .sort((a, b) => Number(a.Order || 0) - Number(b.Order || 0));
 
       return passwordSlides.map((slide, i) => ({
-        label: slideLabelMap.get(slide.Id) || cleanExerciseLabel(slide.PasswordPageConfig?.title || '') || `Item ${i + 1}`,
+        label: orderedExerciseLabels[i] || cleanExerciseLabel(slide.PasswordPageConfig?.title || '') || `Item ${i + 1}`,
         password: slide.Password
       }));
     }
