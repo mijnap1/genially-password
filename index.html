@@ -210,11 +210,7 @@
 
     .password-grid {
       display: flex;
-<<<<<<< HEAD
-      flex-wrap: wrap;
-=======
       flex-direction: column;
->>>>>>> 4b69e22 (Polish index UI and API)
       gap: 14px;
       margin-top: 12px;
     }
@@ -229,10 +225,7 @@
       position: relative;
       transition: transform 0.25s ease, box-shadow 0.3s ease;
       user-select: none;
-<<<<<<< HEAD
-=======
       width: 100%;
->>>>>>> 4b69e22 (Polish index UI and API)
     }
 
     .tag:hover {
@@ -261,8 +254,6 @@
       opacity: 1;
     }
 
-<<<<<<< HEAD
-=======
     .hidden-tag {
       display: none;
     }
@@ -289,8 +280,6 @@
       background: rgba(76,130,247,0.1);
       transform: translateY(-1px);
     }
-
->>>>>>> 4b69e22 (Polish index UI and API)
     .review-overlay {
       position: fixed;
       top: 0;
@@ -424,6 +413,38 @@ code {
       menu.style.display = menu.style.display === "flex" ? "none" : "flex";
     }
 
+    function extractExercisePasswordPairs(raw) {
+      const exerciseRegex = /(Exercice|Activité)\s+\d+\s+p\.\d+/gi;
+      const passwordRegex = /"Password":"(.*?)"/g;
+
+      const exercises = [...raw.matchAll(exerciseRegex)].map(match => ({
+        label: match[0],
+        index: match.index ?? -1
+      }));
+
+      const passwords = [...raw.matchAll(passwordRegex)].map(match => ({
+        value: match[1],
+        index: match.index ?? -1
+      }));
+
+      return passwords.map((password, i) => {
+        let matchedExercise = null;
+
+        for (const exercise of exercises) {
+          if (exercise.index <= password.index) {
+            matchedExercise = exercise;
+          } else {
+            break;
+          }
+        }
+
+        return {
+          label: matchedExercise?.label || `Item ${i + 1}`,
+          password: password.value
+        };
+      });
+    }
+
     async function fetchPasswords() {
     const apiId = document.getElementById('apiIdInput').value.trim();
     const outputDiv = document.getElementById('output');
@@ -448,38 +469,25 @@ code {
       const data = await response.json();
       const raw = JSON.stringify(data);
 
-      const passwords = [...raw.matchAll(/"Password":"(.*?)"/g)].map(m => m[1]);
-      const exercises = [...raw.matchAll(/(Exercice|Activité)\s+\d+\s+p\.\d+/gi)].map(m => m[0]);
+      const entries = extractExercisePasswordPairs(raw);
 
-      if (passwords.length > 0) {
+      if (entries.length > 0) {
         let displayHTML = '';
-        for (let i = 0; i < passwords.length; i++) {
-          const label = exercises[i] || `Item ${i + 1}`;
-          const password = passwords[i];
-<<<<<<< HEAD
-          displayHTML += `
-            <div class="tag" onclick="copyToClipboard(this.querySelector('.pw'))">
-              <strong>${label}</strong><br>
-              🔒 Password: <code class="pw">${password}</code>
-=======
+        for (let i = 0; i < entries.length; i++) {
+          const { label, password } = entries[i];
           const hiddenClass = i >= 5 ? ' hidden-tag' : '';
           displayHTML += `
             <div class="tag${hiddenClass}" onclick="copyToClipboard(this.querySelector('.pw'))">
               <strong>${label}</strong><br>
               Password: <code class="pw">${password}</code>
->>>>>>> 4b69e22 (Polish index UI and API)
               <span class="copied-msg">Copied!</span>
             </div>
           `;
         }
-<<<<<<< HEAD
-        outputDiv.innerHTML = `<div class="password-grid">${displayHTML}</div>`;
-=======
         outputDiv.innerHTML = `
           <div class="password-grid">${displayHTML}</div>
-          ${passwords.length > 5 ? '<div class="see-less-wrap"><button class="see-less-btn" id="toggleResultsBtn" onclick="toggleResults()">See more</button></div>' : ''}
+          ${entries.length > 5 ? '<div class="see-less-wrap"><button class="see-less-btn" id="toggleResultsBtn" onclick="toggleResults()">See more</button></div>' : ''}
         `;
->>>>>>> 4b69e22 (Polish index UI and API)
       } else {
         outputDiv.textContent = 'No passwords found.';
       }
@@ -497,8 +505,6 @@ code {
     });
   }
 
-<<<<<<< HEAD
-=======
   function toggleResults() {
     const hiddenTags = document.querySelectorAll('.hidden-tag');
     const button = document.getElementById('toggleResultsBtn');
@@ -510,8 +516,6 @@ code {
 
     button.textContent = isCollapsed ? 'See less' : 'See more';
   }
-
->>>>>>> 4b69e22 (Polish index UI and API)
     function openReview() {
       document.getElementById("reviewOverlay").style.display = "flex";
     }
@@ -563,8 +567,3 @@ code {
   </style>
 </body>
 </html>
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 4b69e22 (Polish index UI and API)
